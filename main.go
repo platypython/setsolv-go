@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 
 	"gocv.io/x/gocv"
 )
@@ -81,6 +82,7 @@ func main() {
 			continue
 		}
 
+		contour = growContour(contour, smallSide*.02)
 		// shape := Shape{
 		// 	FullContour:   contour,
 		// 	ParentContour: growContour(contour, smallSide*.02),
@@ -135,23 +137,49 @@ func findType(extent float64) string {
 }
 
 func growContour(contour gocv.PointVector, resize float64) gocv.PointVector {
-	// cSize := contour.Size()
-	fmt.Printf("%+v\n", contour.ToPoints())
 	return contour
-	// newC := gocv.NewMatWithSize(cSize/2, 2, gocv.MatTypeCV32S)
+	dataLength := contour.Size()
+	points := contour.ToPoints()
 
-	// prevPoint := image.Point{contour.ToPoints()[0], contour.ToPoints()[1]}
-	// pointPoint := image.Point{contour.ToPoints()[2], contour.ToPoints()[3]}
-	// nextPoint := image.Point{contour.ToPoints()[4], contour.ToPoints()[5]}
+	prevPoint := image.Point{points[0].X, points[0].Y}
+	pointPoint := image.Point{points[1].X, points[1].Y}
+	nextPoint := image.Point{points[2].X, points[2].Y}
 
-	// for i := 6; i < cSize+6; i += 2 {
-	// 	dist := getDistVec(prevPoint, nextPoint)
-	// }
+	newC := gocv.NewMatWithSize(dataLength/2, 2, gocv.MatTypeCV32S)
+	for i := 6; i < dataLength+6; i += 2 {
+		dist := getDistVec(prevPoint, nextPoint)
+		if dist.X != 0 || dist.Y != 0 {
+			facing := getNormalOrtho(dist)
+			// newC.SetIntAt(points[i%dataLength].X, dist.Y, int32(math.Floor(float64(pointPoint.X)+resize*float64(facing.X))))
+			newC.SetIntAt(dist.X, dist.Y, int32(math.Floor(float64(pointPoint.X)+resize*float64(facing.X))))
+			newC.SetIntAt(dist.X, dist.Y, int32(math.Floor(float64(pointPoint.X)+resize*float64(facing.X))))
+			// gocv.NewMatWithSizeFromScalar()
+			// gocv.NewMatFrom
+		}
+	}
+	// return newC
+	return gocv.NewPointVectorFromMat(newC)
 }
+
+// func getContourPoint(points []image.Point, index int) image.Point {
+// 	return image.Point{
+// 		X: points[index].X,
+// 		Y: points[index+1].Y,
+// 	}
+// }
 
 func getDistVec(p0, p1 image.Point) image.Point {
 	return image.Point{
 		p1.X - p0.X,
 		p1.Y - p0.Y,
+	}
+}
+
+func getNormalOrtho(dist image.Point) image.Point {
+	length := math.Sqrt((float64(dist.X) * 2) + (float64(dist.Y) * 2))
+	return image.Point{
+		// the switching of this seems like a mistake
+		X: dist.Y / int(length),
+		Y: dist.X / int(length),
 	}
 }
