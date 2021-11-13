@@ -81,12 +81,12 @@ func main() {
 			continue
 		}
 
-		shape := Shape{
-			FullContour:   contour,
-			ParentContour: growContour(contour, smallSide*.02),
-			ChildContour:  growContour(contour, smallSide*-.01),
-			Type:          findType(shapeExtent),
-		}
+		// shape := Shape{
+		// 	FullContour:   contour,
+		// 	ParentContour: growContour(contour, smallSide*.02),
+		// 	ChildContour:  growContour(contour, smallSide*-.01),
+		// 	Type:          findType(shapeExtent),
+		// }
 
 		// for i, contour := range contours.ToPoints() {
 		fmt.Println(contour.Size())
@@ -117,9 +117,9 @@ func getGreaterAspectRatio(minRect gocv.RotatedRect) float64 {
 }
 
 type Shape struct {
-	FullContour   gocv.PointsVector
-	ParentContour gocv.PointsVector
-	ChildContour  gocv.PointsVector
+	FullContour   gocv.PointVector
+	ParentContour gocv.PointVector
+	ChildContour  gocv.PointVector
 	Type          string
 }
 
@@ -134,17 +134,19 @@ func findType(extent float64) string {
 	}
 }
 
-func growContour(contour gocv.PointsVector, resize float64) gocv.PointsVector {
-	cSize := contour.Size()
-	newC := gocv.NewMatWithSize(cSize/2, 2, gocv.MatTypeCV32S)
+func growContour(contour gocv.PointVector, resize float64) gocv.PointVector {
+	// cSize := contour.Size()
+	fmt.Printf("%+v\n", contour.ToPoints())
+	return contour
+	// newC := gocv.NewMatWithSize(cSize/2, 2, gocv.MatTypeCV32S)
 
-	prevPoint := image.Point{contour.ToPoints()[0], contour.ToPoints()[1]}
-	pointPoint := image.Point{contour.ToPoints()[2], contour.ToPoints()[3]}
-	nextPoint := image.Point{contour.ToPoints()[4], contour.ToPoints()[5]}
+	// prevPoint := image.Point{contour.ToPoints()[0], contour.ToPoints()[1]}
+	// pointPoint := image.Point{contour.ToPoints()[2], contour.ToPoints()[3]}
+	// nextPoint := image.Point{contour.ToPoints()[4], contour.ToPoints()[5]}
 
-	for i := 6; i < cSize+6; i += 2 {
-		dist := getDistVec(prevPoint, nextPoint)
-	}
+	// for i := 6; i < cSize+6; i += 2 {
+	// 	dist := getDistVec(prevPoint, nextPoint)
+	// }
 }
 
 func getDistVec(p0, p1 image.Point) image.Point {
